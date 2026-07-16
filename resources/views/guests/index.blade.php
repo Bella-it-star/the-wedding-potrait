@@ -96,18 +96,16 @@
         /* PENGATURAN KHUSUS UTK PRINTER STRUK/KUPON KECIL */
         @media print {
             @page { 
-                margin: 0; /* Menghilangkan header/footer URL bawaan browser */
+                margin: 0; 
             }
             body { 
                 margin: 0;
                 background: #fff;
                 padding: 0;
             }
-            /* Sembunyikan semua halaman web di belakang */
             body * {
                 visibility: hidden;
             }
-            /* Hanya tampilkan area isi modal tiket saja */
             .modal.show, .modal.show * {
                 visibility: visible;
             }
@@ -124,7 +122,6 @@
                 box-shadow: none !important;
                 background: #fff !important;
             }
-            /* Sembunyikan tombol close, judul modal, dan footer modal saat di-print */
             .modal-header, .modal-footer, p.text-muted {
                 display: none !important;
             }
@@ -132,17 +129,14 @@
                 padding: 5mm !important;
                 width: 100% !important;
             }
-            /* Paksa Kupon Mengikuti Lebar Kertas Printer Kasir */
             .ticket-box {
                 width: 95% !important;
                 max-width: 95% !important;
                 margin: 0 auto 8mm auto !important;
-                border: 2px dashed #000 !important; /* Ubah hitam biar jelas di printer thermal hitam-putih */
+                border: 2px dashed #000 !important;
                 background: #fff !important;
                 box-shadow: none !important;
                 padding: 15px !important;
-                
-                /* Potong kertas per lembar tiket */
                 page-break-after: always !important;
                 break-after: page !important;
             }
@@ -163,7 +157,7 @@
     <nav class="navbar navbar-expand-lg py-3 mb-5 shadow-sm">
         <div class="container">
             <a href="{{ url('/') }}" class="navbar-brand fs-4 text-decoration-none">
-            <i class="fa-solid fa-heart text-purple me-2" style="color: #7f5af0;"></i>The Wedding Portrait
+                <i class="fa-solid fa-heart text-purple me-2" style="color: #7f5af0;"></i>The Wedding Portrait
             </a>
             <div class="d-flex align-items-center">
                 <span class="badge p-2 rounded-3" style="background-color: #f4f0fa; color: #4a287a; border: 1px solid #e1d3fc;">
@@ -184,7 +178,7 @@
 
         <!-- NOTIFIKASI -->
         @if(session('success'))
-            <div class="alert alert-purple border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center" role="alert">
+            <div class="alert alert-purple border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center" style="background-color: #e8e3f5; color: #4a287a;" role="alert">
                 <i class="fa-solid fa-circle-check fs-4 me-3 text-success"></i>
                 <div>{{ session('success') }}</div>
             </div>
@@ -193,18 +187,24 @@
         <!-- AREA UTAMA -->
         <div class="card card-custom p-4 mb-5">
             
-            <!-- FORM PENCARIAN -->
+            <!-- FORM PENCARIAN & TOMBOL TAMBAH TAMU -->
             <form action="{{ route('guests.index') }}" method="GET" class="row g-3 mb-4">
-                <div class="col-md-9">
+                <div class="col-md-7">
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                        <input type="text" name="q" class="form-control bg-light border-start-0" placeholder="Cari berdasarkan nama tamu undangan..." value="{{ $search }}">
+                        <input type="text" name="q" class="form-control bg-light border-start-0" placeholder="Cari berdasarkan nama tamu undangan..." value="{{ $search ?? '' }}">
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <button type="submit" class="btn btn-purple w-100 fw-bold">
-                        <i class="fa-solid fa-filter me-2"></i>Cari Tamu
+                        <i class="fa-solid fa-filter me-2"></i>Cari
                     </button>
+                </div>
+                <!-- FITUR TAMBAH DATA (CREATE) -->
+                <div class="col-md-3">
+                    <a href="{{ route('guests.create') }}" class="btn btn-success w-100 fw-bold rounded-3 shadow-sm">
+                        <i class="fa-solid fa-user-plus me-2"></i>Tambah Tamu
+                    </a>
                 </div>
             </form>
 
@@ -218,7 +218,7 @@
                             <th class="py-3">KATEGORI</th>
                             <th class="text-center py-3">NO. MEJA</th>
                             <th class="py-3">STATUS KEHADIRAN</th>
-                            <th class="text-center py-3 pe-3">AKSI CHECK-IN</th>
+                            <th class="text-center py-3 pe-3">AKSI KELOLA TAMU</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -253,30 +253,46 @@
                                     @endif
                                 </td>
                                 <td class="text-center pe-3">
-                                    @if(!$guest->checkin)
-                                        <!-- BELUM CHECK-IN -->
-                                        <form action="{{ route('guests.checkin', $guest->id) }}" method="POST" class="d-flex justify-content-center gap-2">
-                                            @csrf
-                                            <div class="input-group input-group-sm" style="width: 100px;">
-                                                <span class="input-group-text"><i class="fa-solid fa-user-plus text-muted"></i></span>
-                                                <input type="number" name="attended_count" class="form-control text-center fw-bold" min="1" max="{{ $guest->invited_count }}" value="1" required>
-                                            </div>
-                                            <button type="submit" class="btn btn-sm btn-purple px-3 rounded-3 fw-bold">
-                                                Check-in
-                                            </button>
-                                        </form>
-                                    @else
-                                        <!-- SUDAH CHECK-IN -> TOMBOL CETAK -->
-                                        <div class="d-flex justify-content-center gap-2">
-                                            <button class="btn btn-sm btn-light border text-muted px-3" disabled>
+                                    <div class="d-flex justify-content-center align-items-center gap-2">
+                                        @if(!$guest->checkin)
+                                            <!-- BELUM CHECK-IN -->
+                                            <form action="{{ route('guests.checkin', $guest->id) }}" method="POST" class="d-flex gap-2 m-0">
+                                                @csrf
+                                                <div class="input-group input-group-sm" style="width: 90px;">
+                                                    <span class="input-group-text"><i class="fa-solid fa-user-plus text-muted"></i></span>
+                                                    <input type="number" name="attended_count" class="form-control text-center fw-bold" min="1" max="{{ $guest->invited_count }}" value="1" required>
+                                                </div>
+                                                <button type="submit" class="btn btn-sm btn-purple px-2.5 rounded-3 fw-bold">
+                                                    Check-in
+                                                </button>
+                                            </form>
+                                        @else
+                                            <!-- SUDAH CHECK-IN -> TOMBOL CETAK -->
+                                            <button class="btn btn-sm btn-light border text-muted px-2" disabled>
                                                 <i class="fa-solid fa-circle-check text-success me-1"></i>Hadir
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-warning text-white fw-bold px-3 rounded-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTiket{{ $guest->id }}">
-                                                <i class="fa-solid fa-print me-1"></i>Cetak Tiket
+                                            <button type="button" class="btn btn-sm btn-warning text-white fw-bold px-2.5 rounded-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTiket{{ $guest->id }}">
+                                                <i class="fa-solid fa-print me-1"></i>Cetak
                                             </button>
-                                        </div>
+                                        @endif
 
-                                        <!-- POP-UP MODAL KUPON -->
+                                        <!-- FITUR UPDATE (EDIT) -->
+                                        <a href="{{ route('guests.edit', $guest->id) }}" class="btn btn-sm btn-outline-warning rounded-3" title="Edit Data Tamu">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+
+                                        <!-- FITUR DELETE (HAPUS) -->
+                                        <form action="{{ route('guests.destroy', $guest->id) }}" method="POST" class="d-inline mb-0" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data {{ $guest->name }}?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-3" title="Hapus Tamu">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <!-- POP-UP MODAL KUPON (Hanya merender jika sudah checkin) -->
+                                    @if($guest->checkin)
                                         <div class="modal fade" id="modalTiket{{ $guest->id }}" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered">
                                                 <div class="modal-content rounded-4 border-0 shadow">

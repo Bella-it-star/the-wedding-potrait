@@ -12,9 +12,10 @@ Route::get('/', function () {
 // SEMENTARA DI-BYPASS (Tanpa login dulu biar bisa langsung dicoba)
 Route::group([], function () {
     
-    // URL untuk Kelola Tamu, Pencarian, dan Check-in
+    // URL untuk Kelola Tamu, Pencarian, dan Check-in, Delete
     Route::resource('guests', GuestController::class);
     Route::post('/guests/{guest}/checkin', [GuestController::class, 'checkin'])->name('guests.checkin');
+    Route::delete('/guests/{id}', [GuestController::class, 'destroy'])->name('guests.destroy');
 
     // URL untuk Import Excel (Sementara dilepas middleware admin-nya biar bisa ditest)
     Route::get('/import-guests', [GuestImportController::class, 'create'])->name('guests.import.index');

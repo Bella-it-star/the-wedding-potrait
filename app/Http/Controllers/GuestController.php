@@ -3,16 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Guest;
-use Illuminate\Http\Request;
 use App\Models\GuestCheckin;
 use App\Models\SouvenirTicket;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class GuestController extends Controller
 {
     public function index(Request $request)
     {
-
         $query = Guest::query()->withCount('souvenirTickets')->with(['checkin', 'souvenirTickets']);
 
         if ($search = $request->get('q')) {
@@ -31,13 +30,14 @@ class GuestController extends Controller
 
     public function store(Request $request)
     {
+        // Aturan validasi disamakan dengan update
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name'          => ['required', 'string', 'max:255'],
             'invited_count' => ['required', 'integer', 'min:1'],
-            'phone' => ['nullable', 'string', 'max:30'],
-            'category' => ['nullable', 'string', 'max:100'],
-            'table_number' => ['nullable', 'string', 'max:30'],
-            'notes' => ['nullable', 'string'],
+            'phone'         => ['nullable', 'string', 'max:30'],
+            'category'      => ['nullable', 'string', 'max:100'],
+            'table_number'  => ['nullable', 'string', 'max:30'],
+            'notes'         => ['nullable', 'string'],
         ]);
 
         Guest::create($data);
@@ -52,31 +52,32 @@ class GuestController extends Controller
 
     public function update(Request $request, Guest $guest)
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+        // Format validasi disamakan menggunakan Array agar konsisten dengan store
+        $validatedData = $request->validate([
+            'name'          => ['required', 'string', 'max:255'],
             'invited_count' => ['required', 'integer', 'min:1'],
-            'phone' => ['nullable', 'string', 'max:30'],
-            'category' => ['nullable', 'string', 'max:100'],
-            'table_number' => ['nullable', 'string', 'max:30'],
-            'notes' => ['nullable', 'string'],
+            'phone'         => ['nullable', 'string', 'max:30'],
+            'category'      => ['nullable', 'string', 'max:100'],
+            'table_number'  => ['nullable', 'string', 'max:30'],
+            'notes'         => ['nullable', 'string'],
         ]);
 
-        $guest->update($data);
+        $guest->update($validatedData);
 
-        return redirect()->route('guests.index')->with('success', 'Data tamu berhasil diperbarui.');
+        return redirect()->route('guests.index')->with('success', 'Data tamu ' . $guest->name . ' berhasil diperbarui!');
     }
 
     public function destroy(Guest $guest)
     {
         $guest->delete();
 
-        return redirect()->route('guests.index')->with('success', 'Tamu berhasil dihapus.');
+        return redirect()->route('guests.index')->with('success', 'Data tamu berhasil dihapus.');
     }
 
-    public function checkin(Request $request, $id)
+    // Mengubah $id menjadi Guest $guest agar konsisten menggunakan Route Model Binding
+    public function checkin(Request $request, Guest $guest)
     {
-        $guest = Guest::findOrFail($id); 
-
+        // Bypass User Terotomatisasi
         $user = DB::table('users')->first();
         if (!$user) {
             $userId = DB::table('users')->insertGetId([
@@ -92,22 +93,24 @@ class GuestController extends Controller
 
         $attendedCount = $request->input('attended_count', 1);
 
-        $checkin = GuestCheckin::forceCreate([
-            'guest_id'       => $guest->id,
-            'attended_count' => $attendedCount,
-            'checked_in_by'  => auth()->id() ?? $userId, 
-            'checked_in_at'  => now(),
-        ]);
-
-        $tickets = [];
-        for ($i = 0; $i < $attendedCount; $i++) {
-            $tickets[] = SouvenirTicket::create([
-                'guest_id'          => $guest->id,
-                'guest_checkin_id'  => $checkin->id,
-                'ticket_code'       => 'SVR-' . strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6)),
-                'status'            => 'unused'
+        // Membungkus proses dengan Transaction agar aman dari data korup/setengah simpan
+        DB::transaction(function () use ($guest, $attendedCount, $userId) {
+            $checkin = GuestCheckin::forceCreate([
+                'guest_id'       => $guest->id,
+                'attended_count' => $attendedCount,
+                'checked_in_by'  => auth()->id() ?? $userId, 
+                'checked_in_at'  => now(),
             ]);
-        }
+
+            for ($i = 0; $i < $attendedCount; $i++) {
+                SouvenirTicket::create([
+                    'guest_id'          => $guest->id,
+                    'guest_checkin_id'  => $checkin->id,
+                    'ticket_code'       => 'SVR-' . strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6)),
+                    'status'            => 'unused'
+                ]);
+            }
+        });
 
         return redirect()->route('guests.index')->with([
             'success' => 'Check-in berhasil untuk ' . $guest->name . '!'
