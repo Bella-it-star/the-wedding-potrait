@@ -28,5 +28,9 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # 8. Buka port standar web
 EXPOSE 80
 
-# 9. Jalankan migrasi database otomatis dan hidupkan server Apache
-CMD php artisan migrate --force && apache2-foreground
+# 9. Matikan modul MPM yang bentrok, jalankan migrasi, lalu hidupkan server Apache
+CMD a2dismod mpm_event 2>/dev/null || true && \
+    a2dismod mpm_worker 2>/dev/null || true && \
+    a2enmod mpm_prefork 2>/dev/null || true && \
+    php artisan migrate --force && \
+    apache2-foreground
