@@ -14,14 +14,15 @@ class GuestImportController extends Controller
 
     public function store(Request $request)
     {
+        // Validasi awal memastikan file wajib diunggah
         $request->validate([
-            'file' => 'required',
+            'file' => 'required|mimes:csv,txt',
         ]);
 
         $file = $request->file('file');
         $filePath = $file->getRealPath();
 
-        // 1. Deteksi otomatis pemisah kolom
+        // 1. Deteksi otomatis pemisah kolom (comma atau semicolon)
         $separator = ',';
         $fileHandleForCheck = fopen($filePath, 'r');
         $firstLine = fgets($fileHandleForCheck);
@@ -33,10 +34,21 @@ class GuestImportController extends Controller
 
         // 2. Proses membaca file
         if (($handle = fopen($filePath, 'r')) !== FALSE) {
-            // Lewati baris pertama (Header: Nama, Kuota, Kategori, Meja)
-            fgetcsv($handle, 1000, $separator);
+            // Ambil baris pertama sebagai Header
+            $header = fgetcsv($handle, 1000, $separator);
 
-            // Baca baris data satu per satu
+            // 🔥 PENGAMAN BARU: Cek validitas header
+            // Mengubah semua tulisan di header menjadi huruf kecil semua biar aman dari typo
+            $cleanHeader = array_map('strtolower', array_filter($header));
+
+            // Jika kata 'nama' tidak ditemukan di baris paling atas, TOLAK!
+            if (!in_array('nama', $cleanHeader)) {
+                fclose($handle); // Tutup file dulu sebelum keluar
+                return redirect()->back()->with('error', 'Gagal Import! Format file salah, kolom "Nama" tidak ditemukan.');
+            }
+            // 🔥 PENGAMAN SELESAI
+
+            // Baca baris data satu per satu setelah lolos pemeriksaan header
             while (($data = fgetcsv($handle, 1000, $separator)) !== FALSE) {
                 if (!empty($data[0])) { // Pastikan kolom nama tidak kosong
                     Guest::create([

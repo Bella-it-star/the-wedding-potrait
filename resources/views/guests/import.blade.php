@@ -89,7 +89,7 @@
         <div class="text-center mb-5">
             <p class="text-uppercase tracking-wider text-muted mb-1" style="font-size: 0.8rem; letter-spacing: 2px;">Admin Desk</p>
             <h1 class="display-5 fw-bold">Import Data Tamu</h1>
-            <p class="text-muted">Unggah daftar tamu undangan secara massal menggunakan file Excel (.xlsx atau .xls).</p>
+            <p class="text-muted">Unggah daftar tamu undangan secara massal menggunakan file Excel (.csv).</p>
         </div>
 
         <!-- NOTIFIKASI HASIL IMPORT -->
@@ -127,7 +127,7 @@
                     <form action="{{ route('guests.import.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="mb-4">
-                            <label for="file" class="form-label fw-bold text-muted small">UPLOAD FILE EXCEL (.XLSX / .XLS)</label>
+                            <label for="file" class="form-label fw-bold text-muted small">UPLOAD FILE EXCEL (.CSV)</label>
                             <input type="file" name="file" id="file" class="form-control form-control-lg" accept=".csv" required>
                         </div>
                         <button type="submit" class="btn btn-purple btn-lg w-100 fw-bold py-3 shadow-sm">
