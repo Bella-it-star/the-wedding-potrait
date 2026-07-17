@@ -110,52 +110,68 @@
         @media print {
             @page { 
                 margin: 0; 
+                size: auto;
             }
-            body { 
-                margin: 0;
-                background: #fff;
-                padding: 0;
-            }
+            
             body * {
                 visibility: hidden;
             }
+            
             .modal.show, .modal.show * {
                 visibility: visible;
             }
+
+            html, body, .container, .card, .table-responsive, table, tbody, tr, td {
+                margin: 0 !important;
+                padding: 0 !important;
+                height: auto !important;
+                min-height: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                background: transparent !important;
+                position: static !important; 
+            }
+
             .modal.show {
-                position: absolute;
-                left: 0;
-                top: 0;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
                 width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
+                display: block !important;
+            }
+            .modal-dialog {
+                margin: 0 auto !important;
+                max-width: 100% !important;
             }
             .modal-content {
                 border: none !important;
                 box-shadow: none !important;
                 background: #fff !important;
             }
-            .modal-header, .modal-footer, p.text-muted {
+    
+            .modal-header, .modal-footer, .modal-body p.text-muted {
                 display: none !important;
             }
             .modal-body {
                 padding: 5mm !important;
                 width: 100% !important;
             }
+
             .ticket-box {
-                width: 95% !important;
-                max-width: 95% !important;
-                margin: 0 auto 8mm auto !important;
+                width: 100% !important;
+                max-width: 75mm !important; 
+                margin: 0 auto 10mm auto !important;
                 border: 2px dashed #000 !important;
                 background: #fff !important;
                 box-shadow: none !important;
                 padding: 15px !important;
-                page-break-after: always !important;
-                break-after: page !important;
+                page-break-inside: avoid !important; 
             }
             .ticket-box h4 {
                 color: #000 !important;
-                font-size: 1.8rem !important;
+                font-size: 1.6rem !important;
                 font-weight: bold !important;
             }
             .ticket-box .text-dark {
@@ -177,6 +193,7 @@
                 <a href="{{ url('/') }}" class="btn rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm btn-back-portal">
                     <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Portal
                 </a>
+
 
                 <span class="badge rounded-pill px-3 py-2" style="background-color: #f4f0fa; color: #4a287a; border: 1px solid #e1d3fc; font-size: 0.85rem; font-weight: 600;">
                     <i class="fa-solid fa-user-tie me-1"></i> Usher Mode
