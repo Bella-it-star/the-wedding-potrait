@@ -49,6 +49,19 @@
             transform: translateY(-2px);
         }
 
+        .btn-back-portal {
+            background: #ffffff;
+            color: #5a6578;
+            border: 1px solid #7c889b;
+            font-size: 0.85rem;
+            transition: all 0.25s ease-in-out;
+        }
+        .btn-back-portal:hover {
+            background: #626e7a !important; 
+            color: #ffffff !important;     
+            border-color: #626e7a !important;
+        }
+
         .badge-vip {
             background-color: #4a287a;
             color: #ffffff;
@@ -84,7 +97,7 @@
             box-shadow: 0 0 0 0.25rem rgba(127, 90, 240, 0.15);
         }
 
-        /* Tampilan Kupon di Layar HP/Laptop */
+        / Tampilan Kupon di Layar HP/Laptop /
         .ticket-box {
             border: 3px dashed #7f5af0;
             border-radius: 12px;
@@ -159,8 +172,13 @@
             <a href="{{ url('/') }}" class="navbar-brand fs-4 text-decoration-none">
                 <i class="fa-solid fa-heart text-purple me-2" style="color: #7f5af0;"></i>The Wedding Portrait
             </a>
-            <div class="d-flex align-items-center">
-                <span class="badge p-2 rounded-3" style="background-color: #f4f0fa; color: #4a287a; border: 1px solid #e1d3fc;">
+            
+            <div class="d-flex align-items-center gap-2">
+                <a href="{{ url('/') }}" class="btn rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm btn-back-portal">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Portal
+                </a>
+
+                <span class="badge rounded-pill px-3 py-2" style="background-color: #f4f0fa; color: #4a287a; border: 1px solid #e1d3fc; font-size: 0.85rem; font-weight: 600;">
                     <i class="fa-solid fa-user-tie me-1"></i> Usher Mode
                 </span>
             </div>
